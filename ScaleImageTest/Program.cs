@@ -26,6 +26,7 @@ namespace ScaleImageTest
             NameImage = path + NameImage;
             string userprofile = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
             string HostName = Environment.MachineName;
+            int FontSize = screenSize.Height / 78;
             Image img = AddText("НАША МИССИЯ: \n" +
 "Мы заботимся о Вашем здоровье, доставляя Вам природную Байкальскую воду. \n" +
 "\n" +
@@ -42,7 +43,7 @@ namespace ScaleImageTest
 "Имя компьютера: " + HostName + 
 
 
-"", NameImage, 14);
+"", NameImage, FontSize);
             img.Save(userprofile + "/wallpaper.jpg");
             path = (userprofile + "/wallpaper.jpg");
             SetWallpaper(path, 1, 0);
@@ -155,11 +156,11 @@ namespace ScaleImageTest
 
             Graphics g = Graphics.FromImage(img);
 
-            //g.SmoothingMode = SmoothingMode.HighQuality;
-            g.InterpolationMode = InterpolationMode.HighQualityBilinear;
+            g.SmoothingMode = SmoothingMode.Default;
+            //g.InterpolationMode = InterpolationMode.HighQualityBilinear;
             //g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            g.TextRenderingHint = TextRenderingHint.SystemDefault;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
             StringFormat format = new StringFormat()
             {
                 Alignment = StringAlignment.Near,
@@ -167,7 +168,7 @@ namespace ScaleImageTest
             };
             g.DrawString(CompanyText, fnt, Brushes.Green, rectf, format);
 
-            //g.Flush();
+            g.Flush();
 
             g.Save();
             //img.Save(path, ImageFormat.Jpeg);
