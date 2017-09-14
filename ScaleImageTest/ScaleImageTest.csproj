@@ -105,7 +105,6 @@
     </Compile>
     <EmbeddedResource Include="Resources\DINPro-Regular.otf" />
     <None Include="Properties\DINPro-Regular.ttf" />
-    <None Include="ScaleImageTest_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

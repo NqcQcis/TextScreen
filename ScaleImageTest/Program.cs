@@ -10,25 +10,31 @@ namespace ScaleImageTest
 {
     class Program
     {
-        public static string path = @"D:/test/";
+        public static string path = @"\\mw.irk\disk\app\wallpaper\";
+
+        const int SPI_SETDESKWALLPAPER = 20;
+        const int SPIF_UPDATEINIFILE = 0x01;
+        const int SPIF_SENDWININICHANGE = 0x02;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        static extern int SystemParametersInfo
+            (int uAction, int uParam, string lpvParam, int fuWinIni);
         [STAThread]
         public static void Main()
-        {                                                                             //сохраняем и делаем обоями
-            //img = ScaleImage(img, screenSize.Width, screenSize.Height);
-            
+        {   
+
             FileInfo fileinfo = new FileInfo(Program.path + "log.txt");
             if (fileinfo.Exists)
             {
                 File.Delete(path + "log.txt");
             }
             Rectangle screenSize = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-            string NameImage = screenSize.Width.ToString() + "x" + screenSize.Height.ToString() + ".jpg";
-            NameImage = path + NameImage;
-            string userprofile = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+            string NameImage =path + screenSize.Width.ToString() + "x" + screenSize.Height.ToString() + ".bmp";
+            string userprofile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string HostName = Environment.MachineName;
-            int FontSize = screenSize.Height / 78;
+            int FontSize = screenSize.Height / 90;
             Image img = AddText("НАША МИССИЯ: \n" +
-"Мы заботимся о Вашем здоровье, доставляя Вам природную Байкальскую воду1. \n" +
+"Мы заботимся о Вашем здоровье, доставляя Вам природную Байкальскую воду. \n" +
 "\n" +
 "НАШИ ЦЕННОСТИ: \n" +
 "1.Открытость компании.Мы проводим политику открытости всех  производственных процессов для Покупателей  нашей продукции.Мы готовы отвечать на любые вопросы наших Покупателей и рады видеть их на нашем производстве. \n" +
@@ -44,18 +50,11 @@ namespace ScaleImageTest
 
 
 "", NameImage, FontSize);
-            img.Save(userprofile + "/wallpaper.jpg");
-            path = (userprofile + "/wallpaper.jpg");
+            img.Save(userprofile + "/wallpaper.bmp");
+            path = (userprofile + "/wallpaper.bmp");
             SetWallpaper(path, 1, 0);
         }
 
-        const int SPI_SETDESKWALLPAPER = 20;
-        const int SPIF_UPDATEINIFILE = 0x01;
-        const int SPIF_SENDWININICHANGE = 0x02;
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        static extern int SystemParametersInfo
-            (int uAction, int uParam, string lpvParam, int fuWinIni);
 
         public static void SetWallpaper (string path, int style, int tile)  // Вносим в раздел реестра информацию о расположении новых обоев и сразу же применяем настройки
         {
@@ -74,69 +73,8 @@ namespace ScaleImageTest
             }
         }
 
-        static Image ScaleImage(Image source, int width, int height)
-        {
-
-            Image dest = new Bitmap(width, height);
-            using (Graphics gr = Graphics.FromImage(dest))
-            {
-                gr.FillRectangle(Brushes.White, 0, 0, width, height);  // Очищаем экран
-                gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-
-                float srcwidth = source.Width;
-                float srcheight = source.Height;
-                float dstwidth = width;
-                float dstheight = height;
-
-                if (srcwidth <= dstwidth && srcheight <= dstheight)  // Исходное изображение меньше целевого
-                {
-                    int left = (width - source.Width) / 2;
-                    int top = (height - source.Height) / 2;
-                    gr.DrawImage(source, left, top, source.Width, source.Height);
-                }
-                else if (srcwidth / srcheight > dstwidth / dstheight)  // Пропорции исходного изображения более широкие
-                {
-                    float cy = srcheight / srcwidth * dstwidth;
-                    float top = ((float)dstheight - cy) / 2.0f;
-                    if (top < 1.0f) top = 0;
-                    gr.DrawImage(source, 0, top, dstwidth, cy);
-                }
-                else  // Пропорции исходного изображения более узкие
-                {
-                    float cx = srcwidth / srcheight * dstheight;
-                    float left = ((float)dstwidth - cx) / 2.0f;
-                    if (left < 1.0f) left = 0;
-                    gr.DrawImage(source, left, 0, cx, dstheight);
-                }
-
-                return dest;
-            }
-        }
-
         public static Image AddText(string CompanyText, string Path, float SizeFont)
         {
-            //InstalledFontCollection fonts = new InstalledFontCollection();
-            //FontFamily[] families = fonts.Families;
-            //int count = 0;
-            //for (int i = 0; i < fonts.Families.Length; i++)
-            //{
-            //    Log(fonts.Families[i].Name.ToString() + " № " + i);
-            //    if (fonts.Families[i].Name.ToString().Equals("DINPro-Regular"))
-            //    {
-            //        count = i;
-
-            //    }
-
-            //    else if (fonts.Families[i].Name.ToString().Equals("Arial"))
-            //    {
-            //        count = i;
-            //    }
-
-            //    else
-            //    {
-
-            //    }
-            //}
             PrivateFontCollection pfc = new PrivateFontCollection();
             try
             {
@@ -147,18 +85,21 @@ namespace ScaleImageTest
                 Log(ex.Message);
             }
             Font fnt = new Font(pfc.Families[0], SizeFont, FontStyle.Regular);
-            System.IO.FileStream fs = new System.IO.FileStream(Path, System.IO.FileMode.Open);
-            System.Drawing.Image img = System.Drawing.Image.FromStream(fs); 
+            FileStream fs = new FileStream(Path, FileMode.Open);
+            Image img = Image.FromStream(fs); 
             fs.Close();
-            int otstup = img.Width / 6 * 4;
+            int otstup = img.Width / 10 * 6;
 
             RectangleF rectf = new RectangleF(otstup,0, img.Width - otstup, img.Height);
 
             Graphics g = Graphics.FromImage(img);
+            Color brushColor = Color.FromArgb(255 / 100 * 50, 0, 0, 0);
+            SolidBrush brush = new SolidBrush(brushColor);
+            g.FillRectangle(brush, rectf);
 
-            g.SmoothingMode = SmoothingMode.Default;
-            //g.InterpolationMode = InterpolationMode.HighQualityBilinear;
-            //g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.InterpolationMode = InterpolationMode.HighQualityBilinear;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
             g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
             StringFormat format = new StringFormat()
@@ -166,12 +107,11 @@ namespace ScaleImageTest
                 Alignment = StringAlignment.Near,
                 LineAlignment = StringAlignment.Near
             };
-            g.DrawString(CompanyText, fnt, Brushes.Green, rectf, format);
+            g.DrawString(CompanyText, fnt, Brushes.White, rectf, format);
 
             g.Flush();
 
             g.Save();
-            //img.Save(path, ImageFormat.Jpeg);
             return img;
         }
 
