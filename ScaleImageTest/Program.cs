@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace ScaleImageTest
@@ -126,6 +127,17 @@ namespace ScaleImageTest
         static void Log(string message)
         {
             File.AppendAllText(Program.path + "log.txt", message + "\n");
+        }
+
+        public static String ParseTag(string text)
+        {
+            string testArg = "<i>";
+            int lenght = text.Length;
+            for (int count = 0; count < text.Length; count++)
+            {
+            }
+            
+
         }
     }
 }
