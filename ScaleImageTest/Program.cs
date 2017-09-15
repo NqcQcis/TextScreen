@@ -10,7 +10,7 @@ namespace ScaleImageTest
 {
     class Program
     {
-        public static string path = @"\\mw.irk\disk\app\wallpaper\";
+        public static string path = Settings1.Default.path;
 
         const int SPI_SETDESKWALLPAPER = 20;
         const int SPIF_UPDATEINIFILE = 0x01;
@@ -33,23 +33,30 @@ namespace ScaleImageTest
             string userprofile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string HostName = Environment.MachineName;
             int FontSize = screenSize.Height / 90;
-            Image img = AddText("НАША МИССИЯ: \n" +
-"Мы заботимся о Вашем здоровье, доставляя Вам природную Байкальскую воду. \n" +
-"\n" +
-"НАШИ ЦЕННОСТИ: \n" +
-"1.Открытость компании.Мы проводим политику открытости всех  производственных процессов для Покупателей  нашей продукции.Мы готовы отвечать на любые вопросы наших Покупателей и рады видеть их на нашем производстве. \n" +
-"2.Ответственность.Мы обеспечиваем стабильный рост компании  силами наших людей, наделенных достаточными полномочиями и полностью принимающими ответственность на себя за свои результаты.Мы доводим до получения результата принятые нами решения.В нашем понимании Ответственность - это полноценное осознавание сотрудником компании последствий своего выбора.\n" +
-"3.Работа в команде.Работая как единая команда, мы стремимся быть профессионалами, способными развиваться и вносить свой вклад в достижение целей нашей компании.Мы уважаем своих коллег, гарантируя им нашу полную поддержку.Мы стремимся помогать им и ценить их каждодневный вклад в общее дело всей компании.\n" +
-"4.Объективность.Мы принимаем решения  в соответствии со стратегией и политикой нашей  компании, на основании проверенных фактов.Отсутствие достоверных фактов требует от нас дополнительных усилий по их выявлению.\n" +
-"5.Поиск нового.В нашей повседневной работе, и в проектах мы ведем постоянный поиск новых решений, поощряя его и нацеливая на повышение надежности и результативности наших бизнес процессов.\n" +
-"6.Лучшие  условия труда.Мы непрестанно стремимся улучшать рабочую обстановку, обеспечивая наилучшие и наиболее комфортные условия труда, образцовый порядок и чистоту.Это позволит нам работать в благоприятной, творческой и безопасной атмосфере.\n" +
-"7.Эффективность и Производительность.Мы стремимся добиваться наших тактических и стратегических целей с упорством и энтузиазмом, постоянно помня об успехе, которого мы хотим достичь общими усилиями.Мы должны целесообразно и вдумчиво подходить к планированию и использованию операционных и стратегических ресурсов.\n" +
-"\n" +
-"\n" +
-"Имя компьютера: " + HostName + 
+
+            FileStream CompanyText;
+            try
+            {
+                CompanyText = new FileStream(Program.path + "CompanyText.txt", FileMode.Open);
+            }
+            catch (FileNotFoundException exc)
+            {
+                Log("FileNotFoundException" + exc.Message);
+                return;
+            }
+            catch (IndexOutOfRangeException exc)
+            {
+                Log("IndexOutOfRangeException" + exc.Message);
+                return;
+            }
+
+            byte[] array = new byte[CompanyText.Length];
+            CompanyText.Read(array, 0, array.Length);
+            string text = System.Text.Encoding.UTF8.GetString(array);
+            
 
 
-"", NameImage, FontSize);
+            Image img = AddText(text + "\n\n\n\n" + "Имя компьютера: " + HostName + "\n", NameImage, FontSize);
             img.Save(userprofile + "/wallpaper.bmp");
             path = (userprofile + "/wallpaper.bmp");
             SetWallpaper(path, 1, 0);
@@ -70,6 +77,7 @@ namespace ScaleImageTest
             catch(Exception ex)
             {
                 Log("Ошибка при изменении реестра: " + ex.Message);
+                return;
             }
         }
 
